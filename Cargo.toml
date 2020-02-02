@@ -3,6 +3,7 @@ name = "qd_html"
 version = "0.1.0"
 authors = ["Volker Ströbel <vs@mysurdity.de>"]
 edition = "2018"
+license = "MIT / Apache-2.0"
 
 [dependencies]
 lazy_static = "1.4"

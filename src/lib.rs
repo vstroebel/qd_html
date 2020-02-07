@@ -13,6 +13,7 @@ mod utils;
 
 pub mod dom;
 pub mod parser;
+pub mod writer;
 
 #[cfg(test)]
 mod tests;

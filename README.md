@@ -1,4 +1,4 @@
-Quick and dirty HTML library
+Quick and dirty HTML reader and writer library
 ==============
 
 # Usage
@@ -11,6 +11,7 @@ qd_html = "0.1.0"
 
 ```rust
 use qd_html::parser::parse_to_dom;
+use qd_html::writer::write;
 
 fn main() {
 
@@ -18,7 +19,9 @@ fn main() {
 
     let document = parse_to_dom(html);
 
-    println!("{:?}", document);
+    let html = write(&document);
+
+    println!("{}", html);
 }
 ```
 

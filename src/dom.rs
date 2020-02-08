@@ -8,6 +8,7 @@ pub enum Node {
     Element(Element),
     Raw(Raw),
     CData(CData),
+    ProcessingInstruction(ProcessingInstruction)
 }
 
 /// Text node
@@ -56,6 +57,18 @@ pub struct CData {
 impl CData {
     pub fn new<T: Into<String>>(content: T) -> CData {
         CData { content: content.into() }
+    }
+}
+
+/// XML processing instruction
+#[derive(Debug)]
+pub struct ProcessingInstruction {
+    pub content: String,
+}
+
+impl ProcessingInstruction {
+    pub fn new<T: Into<String>>(content: T) -> ProcessingInstruction {
+        ProcessingInstruction { content: content.into() }
     }
 }
 
@@ -224,6 +237,10 @@ impl Element {
 
     pub fn add_cdata<T: Into<String>>(&mut self, content: T) {
         self.nodes.push(Node::CData(CData::new(content.into())));
+    }
+
+    pub fn add_processing_instruction<T: Into<String>>(&mut self, content: T) {
+        self.nodes.push(Node::ProcessingInstruction(ProcessingInstruction::new(content.into())));
     }
 
     pub fn set_attribute<T: Into<String>, T2: Into<String>>(&mut self, name: T, value: T2) {

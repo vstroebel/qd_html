@@ -91,14 +91,7 @@ impl<'a, H: ParseHandler> Parser<'a, H> {
                             }
                         }
                     }
-                    Some('?') => {
-                        //TODO: Maybe implements this... not useful in pure html anyways
-                        let mut text = self.reader.read_raw("?>");
-                        text.insert(0, '<');
-                        text.insert(1, '?');
-                        text.push_str("?>");
-                        self.handler.text(text);
-                    }
+                    Some('?') => self.parse_processing_instruction(),
                     Some(ch) => {
                         self.reader.push_back(ch);
                         self.parse_start_element();
@@ -112,6 +105,11 @@ impl<'a, H: ParseHandler> Parser<'a, H> {
                 self.handler.text(text);
             }
         }
+    }
+
+    fn parse_processing_instruction(&mut self) {
+        let text = self.reader.read_raw("?>");
+        self.handler.processing_instruction(text);
     }
 
     fn parse_start_element(&mut self) {
@@ -214,6 +212,8 @@ pub trait ParseHandler {
 
     fn doctype(&mut self, content: String);
 
+    fn processing_instruction(&mut self, content: String);
+
     fn element_start(
         &mut self,
         name: String,
@@ -253,6 +253,10 @@ impl ParseHandler for DomParseHandler {
 
     fn doctype(&mut self, content: String) {
         self.doctype = Some(content);
+    }
+
+    fn processing_instruction(&mut self, content: String) {
+        self.current.add_processing_instruction(content);
     }
 
     fn element_start(

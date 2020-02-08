@@ -1,4 +1,3 @@
-
 use crate::writer::*;
 use crate::dom::*;
 
@@ -20,7 +19,6 @@ fn empty_doc() {
 
 #[test]
 fn doctype() {
-
     assert_eq!(
         "<!DOCTYPE html>",
         write(&Document {
@@ -56,7 +54,7 @@ fn single_element_with_attribute_and_entity() {
     let mut e = Element::new("test");
 
     e.attributes.set("attr1", "><&\"'\u{a0}äöü");
-    
+
     doc.nodes.push(Node::Element(e));
     assert_eq!(
         "<test attr1=\"><&amp;&quot;'&nbsp;äöü\"></test>",
@@ -84,6 +82,13 @@ fn single_cdata() {
     let mut doc = Element::new("#document");
     doc.add_cdata(" Hello World ");
     assert_eq!("<![CDATA[ Hello World ]]>", write_element(&doc));
+}
+
+#[test]
+fn processing_instruction() {
+    let mut doc = Element::new("#document");
+    doc.add_processing_instruction(" whatever ");
+    assert_eq!("<? whatever ?>", write_element(&doc));
 }
 
 #[test]

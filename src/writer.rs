@@ -1,4 +1,3 @@
-
 use crate::dom::*;
 use crate::utils::*;
 
@@ -119,6 +118,12 @@ impl<'a> HtmlWriter<'a> {
     pub fn append_raw(&mut self, content: &str) {
         self.push_str(content);
     }
+
+    pub fn append_processing_instruction(&mut self, content: &str) {
+        self.push_str("<?");
+        self.push_str(content);
+        self.push_str("?>");
+    }
 }
 
 pub fn write(doc: &Document) -> String {
@@ -154,7 +159,8 @@ fn append_nodes(mut writer: &mut HtmlWriter, nodes: &[Node]) {
             Node::Text(ref text) => writer.append_text(&text.content, false),
             Node::Comment(ref comment) => writer.append_comment(&comment.content),
             Node::CData(ref cdata) => writer.append_cdata(&cdata.content),
-            Node::Raw(ref raw) => writer.append_raw(&raw.content),            
+            Node::Raw(ref raw) => writer.append_raw(&raw.content),
+            Node::ProcessingInstruction(ref pi) => writer.append_processing_instruction(&pi.content)
         }
     }
 }

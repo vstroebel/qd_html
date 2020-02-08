@@ -467,15 +467,15 @@ fn unknown_short_bang_stuff_short2() {
 }
 
 #[test]
-fn ignored_processing_instruction() {
+fn parse_processing_instruction() {
     let e = parse_to_dom("<?what ever ?>").element;
 
     assert_eq!(e.name, "#document", "Bad document:{:?}", e);
     assert_eq!(e.attributes.len(), 0);
     assert_eq!(e.nodes.len(), 1);
 
-    if let &Node::Text(ref e) = &e.nodes[0] {
-        assert_eq!(e.content, "<?what ever ?>");
+    if let &Node::ProcessingInstruction(ref e) = &e.nodes[0] {
+        assert_eq!(e.content, "what ever ");
     } else {
         panic!("Node of wrong type:{:?}", e);
     }

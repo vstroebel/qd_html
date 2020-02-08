@@ -546,3 +546,21 @@ fn processing_instruction_with_multicode_point_grapheme() {
         panic!("Node of wrong type");
     }
 }
+
+#[test]
+fn is_xml() {
+    let doc = parse_to_dom("<?xml version=\"1.0\"?>");
+    assert!(doc.is_xml);
+}
+
+#[test]
+fn xml_and_doctype() {
+    let doc = parse_to_dom("<?xml version=\"1.0\"?><!DOCTYPE html>");
+    assert_eq!(doc.doctype, Some("html".to_owned()));
+    let e = doc.element;
+    assert!(doc.is_xml);
+
+    assert_eq!(e.name, "#document");
+    assert_eq!(e.attributes.len(), 0);
+    assert_eq!(e.nodes.len(), 0);
+}

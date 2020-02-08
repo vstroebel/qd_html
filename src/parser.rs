@@ -229,6 +229,7 @@ struct DomParseHandler {
     pub stack: Vec<Element>,
     pub current: Element,
     pub doctype: Option<String>,
+    pub is_xml: bool,
 }
 
 impl ParseHandler for DomParseHandler {
@@ -256,7 +257,11 @@ impl ParseHandler for DomParseHandler {
     }
 
     fn processing_instruction(&mut self, content: String) {
-        self.current.add_processing_instruction(content);
+        if content.starts_with("xml") {
+            self.is_xml = true;
+        } else {
+            self.current.add_processing_instruction(content);
+        }
     }
 
     fn element_start(
@@ -306,12 +311,14 @@ pub fn parse_to_dom(raw: &str) -> Document {
         stack: Vec::new(),
         current: Element::new("#document"),
         doctype: None,
+        is_xml: false,
     };
 
     parse(&mut handler, raw);
 
     Document {
         doctype: handler.doctype,
+        is_xml: handler.is_xml,
         element: handler.current,
     }
 }

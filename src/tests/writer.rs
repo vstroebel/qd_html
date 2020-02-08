@@ -13,6 +13,7 @@ fn empty_doc() {
         write(&Document {
             doctype: None,
             element: Element::new("#document"),
+            is_xml: false
         })
     );
 }
@@ -24,6 +25,7 @@ fn doctype() {
         write(&Document {
             doctype: Some("html".to_owned()),
             element: Element::new("#document"),
+            is_xml: false
         })
     );
 }
@@ -89,6 +91,18 @@ fn processing_instruction() {
     let mut doc = Element::new("#document");
     doc.add_processing_instruction(" whatever ");
     assert_eq!("<? whatever ?>", write_element(&doc));
+}
+
+#[test]
+fn xml() {
+    assert_eq!(
+        "<?xml version=\"1.0\"?>\n<!DOCTYPE html>",
+        write(&Document {
+            doctype: Some("html".to_owned()),
+            element: Element::new("#document"),
+            is_xml: true
+        })
+    );
 }
 
 #[test]

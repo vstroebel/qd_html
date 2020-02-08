@@ -264,5 +264,6 @@ impl Element {
 #[derive(Debug)]
 pub struct Document {
     pub doctype: Option<String>,
+    pub is_xml: bool,
     pub element: Element,
 }

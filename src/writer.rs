@@ -119,6 +119,10 @@ impl<'a> HtmlWriter<'a> {
         self.push_str(content);
     }
 
+    pub fn append_nl(&mut self) {
+        self.push('\n');
+    }
+
     pub fn append_processing_instruction(&mut self, content: &str) {
         self.push_str("<?");
         self.push_str(content);
@@ -130,6 +134,12 @@ pub fn write(doc: &Document) -> String {
     let mut result = "".to_owned();
     {
         let mut writer = HtmlWriter::new(&mut result);
+
+        if doc.is_xml {
+            writer.append_processing_instruction("xml version=\"1.0\"");
+            writer.append_nl();
+        }
+
         if let Some(ref dtd) = doc.doctype {
             writer.write_doctype(dtd);
         }

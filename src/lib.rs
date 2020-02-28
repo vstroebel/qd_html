@@ -9,8 +9,8 @@
 extern crate lazy_static;
 
 mod reader;
-mod utils;
 
+pub mod utils;
 pub mod dom;
 pub mod parser;
 pub mod writer;

@@ -62,3 +62,21 @@ pub fn decode_entity(entity: &str) -> Option<char> {
 
     ENTITIES.get(entity).cloned()
 }
+
+///Returns a cleaned up version of the input HTML
+///
+/// This parses the html and write the resulting document without modifications.
+/// The result is not guaranteed to be a valid HTML but simple errors like missing close tags should be removed.
+
+/// # Examples
+///
+/// ```rust
+/// use qd_html::utils::cleanup;
+///
+/// let input_html = "<!DOCTYPE html><html><body><h1>test</body></html>";
+/// let output_html = cleanup(input_html);
+/// assert_eq!(output_html, "<!DOCTYPE html><html><body><h1>test</h1></body></html>");
+/// ```
+pub fn cleanup(html: &str) -> String {
+    crate::writer::write(&crate::parser::parse_to_dom(html))
+}

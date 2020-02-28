@@ -83,3 +83,17 @@ fn bad_dec2() {
 fn bad_dec3() {
     assert_eq!(decode_entity("#99999999999999999999"), None);
 }
+
+#[test]
+fn cleanup_valid() {
+    let html = "<!DOCTYPE html><html><head><title>Test</title></head><body><h1>test</h1></body></html>";
+    assert_eq!(cleanup(html), html);
+}
+
+#[test]
+fn cleanup_missing_close_tag() {
+    let html = "<!DOCTYPE html><html><head><title>Test</title></head><body><h1>test</body></html>";
+    let html2 = "<!DOCTYPE html><html><head><title>Test</title></head><body><h1>test</h1></body></html>";
+
+    assert_eq!(cleanup(html), html2);
+}

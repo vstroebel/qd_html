@@ -23,72 +23,15 @@ impl<'a, H: ParseHandler> Parser<'a, H> {
         match ch {
             '<' => {
                 match self.reader.next_char() {
-                    Some('/') => {
-                        self.parse_end_element();
-                    }
+                    Some('/') => self.parse_end_element(),
                     Some('!') => {
                         match (self.reader.next_char(), self.reader.next_char()) {
-                            (Some('-'), Some('-')) => {
-                                let content = self.reader.read_raw("-->");
-                                self.handler.comment(content);
-                            }
-                            (Some('['), Some('C')) => {
-                                let marker = self.reader.read_raw_count(5);
-                                if &marker == "DATA[" {
-                                    let content = self.reader.read_raw("]]>");
-                                    self.handler.cdata(content);
-                                } else {
-                                    let mut text = self.reader.read_text(&['<', '>']);
-                                    text.insert_str(0, "<![C");
-                                    text.insert_str(4, &marker);
-                                    if self.reader.ignore_if_next('>') {
-                                        text.push('>');
-                                    }
-                                    self.handler.text(text);
-                                }
-                            }
-                            (Some('D'), Some('O')) => {
-                                let marker = self.reader.read_raw_count(5);
-                                if &marker == "CTYPE" {
-                                    self.handler.doctype(
-                                        self.reader.read_raw(">").trim().to_owned(),
-                                    );
-                                } else {
-                                    let mut text = self.reader.read_text(&['<', '>']);
-                                    text.insert_str(0, "<!DO");
-                                    text.insert_str(4, &marker);
-                                    if self.reader.ignore_if_next('>') {
-                                        text.push('>');
-                                    }
-                                    self.handler.text(text);
-                                }
-                            }
-                            (Some('>'), ch2) => {
-                                self.handler.text("<!>".to_owned());
-                                if let Some(ch2) = ch2 {
-                                    self.reader.push_back(ch2);
-                                }
-                            }
-                            (Some(ch), Some('>')) => {
-                                self.handler.text(format!("<!{}>", ch));
-                            }
-
-                            (ch, ch2) => {
-                                let mut text = "<!".to_owned();
-
-                                if let Some(ch) = ch {
-                                    text.push(ch);
-                                }
-                                if let Some(ch2) = ch2 {
-                                    text.push(ch2);
-                                    text.push_str(&self.reader.read_text(&['<', '>']));
-                                }
-
-                                if self.reader.ignore_if_next('>') {
-                                    text.push('>');
-                                }
-                                self.handler.text(text);
-                            }
+                            (Some('-'), Some('-')) => self.parse_comment(),
+                            (Some('['), Some('C')) => self.parse_cdata(),
+                            (Some('D'), Some('O')) => self.parse_doctype(),
+                            (Some('>'), ch2) => self.parse_unknown_special_tag(ch2),
+                            (Some(ch), Some('>')) => self.parse_unknown_special_tag2(ch),
+                            (ch, ch2) => self.parse_unknown_special_tag3(ch, ch2),
                         }
                     }
                     Some('?') => self.parse_processing_instruction(),
@@ -106,6 +49,73 @@ impl<'a, H: ParseHandler> Parser<'a, H> {
             }
         }
     }
+
+    fn parse_doctype(&mut self) {
+        let marker = self.reader.read_raw_count(5);
+        if &marker == "CTYPE" {
+            self.handler.doctype(
+                self.reader.read_raw(">").trim().to_owned(),
+            );
+        } else {
+            let mut text = self.reader.read_text(&['<', '>']);
+            text.insert_str(0, "<!DO");
+            text.insert_str(4, &marker);
+            if self.reader.ignore_if_next('>') {
+                text.push('>');
+            }
+            self.handler.text(text);
+        }
+    }
+
+    fn parse_cdata(&mut self) {
+        let marker = self.reader.read_raw_count(5);
+        if &marker == "DATA[" {
+            let content = self.reader.read_raw("]]>");
+            self.handler.cdata(content);
+        } else {
+            let mut text = self.reader.read_text(&['<', '>']);
+            text.insert_str(0, "<![C");
+            text.insert_str(4, &marker);
+            if self.reader.ignore_if_next('>') {
+                text.push('>');
+            }
+            self.handler.text(text);
+        }
+    }
+
+    fn parse_comment(&mut self) {
+        let content = self.reader.read_raw("-->");
+        self.handler.comment(content);
+    }
+
+    fn parse_unknown_special_tag(&mut self, ch2: Option<char>) {
+        self.handler.text("<!>".to_owned());
+        if let Some(ch2) = ch2 {
+            self.reader.push_back(ch2);
+        }
+    }
+
+    fn parse_unknown_special_tag2(&mut self, ch: char) {
+        self.handler.text(format!("<!{}>", ch))
+    }
+
+    fn parse_unknown_special_tag3(&mut self, ch: Option<char>, ch2: Option<char>) {
+        let mut text = "<!".to_owned();
+
+        if let Some(ch) = ch {
+            text.push(ch);
+        }
+        if let Some(ch2) = ch2 {
+            text.push(ch2);
+            text.push_str(&self.reader.read_text(&['<', '>']));
+        }
+
+        if self.reader.ignore_if_next('>') {
+            text.push('>');
+        }
+        self.handler.text(text);
+    }
+
 
     fn parse_processing_instruction(&mut self) {
         let text = self.reader.read_raw("?>");

@@ -1,4 +1,4 @@
-//! A simplified Document Object Model
+//! Minimalistic Document Object Model
 
 /// A node
 #[derive(Debug)]
@@ -266,4 +266,17 @@ pub struct Document {
     pub doctype: Option<String>,
     pub is_xml: bool,
     pub element: Element,
+}
+
+impl Document {
+
+    /// Creates a new empty HTML document
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> Document {
+        Document {
+            doctype: Some("html".to_owned()),
+            is_xml: false,
+            element: Element::new("#document")
+        }
+    }
 }

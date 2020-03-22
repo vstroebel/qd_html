@@ -1,9 +1,7 @@
+
 use std::str::Chars;
 use crate::utils::*;
 
-/**
-* Internal utility providing specialized helper for reading from a `str`
-*/
 pub(crate) struct Reader<'a> {
     iter: Chars<'a>,
     pushback: Option<char>,

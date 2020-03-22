@@ -1,4 +1,6 @@
 
+//! Set of utility function
+
 use std::collections::HashSet;
 use std::collections::HashMap;
 use std::char::from_u32;

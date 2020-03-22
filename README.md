@@ -1,13 +1,27 @@
-Quick and dirty HTML reader and writer library
-==============
+# qd_html
 
-# Usage
+A simple rust library for working with HTML.
+
+Feature:
+ - parser with a SAX alike interface
+ - writer
+ - minimalistic DOM implementation
+ - some utilities
+ - installable app to clean up HTML files
+  
+**NOTE**: This is **NOT** a fully standard compliant HTML parser.
+If you need this [html5ever](https://crates.io/crates/html5ever) might be a better solution.
+
+## Getting Started
+
+Add the following dependency to your Cargo manifest.
 
 ```toml
 [dependencies]
 qd_html = "0.1.0"
 ```
-# Example
+
+## Example
 
 ```rust
 use qd_html::parser::parse_to_dom;

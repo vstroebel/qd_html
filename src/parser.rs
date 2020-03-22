@@ -1,3 +1,5 @@
+//! Read HTML files from strings
+
 use crate::dom::*;
 use crate::utils::*;
 use crate::reader::*;
@@ -211,19 +213,95 @@ impl<'a, H: ParseHandler> Parser<'a, H> {
     }
 }
 
+/// Handles parser events
+///
+/// # Example
+///
+/// A handler that prints events to stdout during parsing:
+///
+/// ```rust
+///
+/// use qd_html::parser::{ParseHandler, parse};
+/// use qd_html::dom::Attributes;
+///
+/// struct ExampleHandler {
+/// }
+///
+/// impl ParseHandler for ExampleHandler {
+///     fn finish(&mut self) {
+///         println!("FINISHED");
+///     }
+///
+///     fn text(&mut self, text: String) {
+///         println!("TEXT: {}", text);
+///     }
+///
+///     fn comment(&mut self, content: String) {
+///         println!("COMMENT: {}", content);
+///     }
+///
+///     fn cdata(&mut self, content: String) {
+///         println!("CDATA: {}", content);
+///     }
+///
+///     fn doctype(&mut self, content: String) {
+///         println!("DOCTYPE: {}", content);
+///     }
+///
+///     fn processing_instruction(&mut self, content: String) {
+///         println!("PI: {}", content);
+///     }
+///
+///     fn element_start(&mut self,
+///                      name: String,
+///                      attributes: Attributes,
+///                      autoclose: bool,
+///                      raw_content: Option<String>) {
+///         println!("ELEMENT START: {}", name);
+///     }
+///
+///     fn element_end(&mut self,name: &str) {
+///         println!("ELEMENT END: {}", name);
+///     }
+///
+/// }
+///
+/// let html = "<html><head></head><body></body></html>";
+///
+/// let mut handler = ExampleHandler{};
+/// parse(&mut handler, html);
+///
+/// ```
+///
+///
 pub trait ParseHandler {
+    /// Called after the parser finished processing the HTML
     fn finish(&mut self) {}
 
+    /// Called on text content
+    ///
+    /// All HTML entities have already been replaced with their corresponding character
     fn text(&mut self, text: String);
 
+    /// Called on a comment
     fn comment(&mut self, content: String);
 
+    /// Called on a Data element
     fn cdata(&mut self, content: String);
 
+    /// Called on a doctype definition
+    ///
+    /// Warning: If a bad HTML file contains multiple doctype definitions this is called multiple time
     fn doctype(&mut self, content: String);
 
+    /// Called on a xml processing instruction
+    ///
+    /// This will be called for XML declarations (i.e. `<?xml version="1"?`>) too.
     fn processing_instruction(&mut self, content: String);
 
+    /// Called on an elements start tag
+    ///
+    /// In case of tags containing raw content (`script` and `style`) the string is passed with the `raw_content` parameter. In this case the element_end event is not fired.
     fn element_start(
         &mut self,
         name: String,
@@ -232,9 +310,13 @@ pub trait ParseHandler {
         raw_content: Option<String>,
     );
 
+    /// Called on an elements end tag
+    ///
+    /// This is not called for autoclosing and raw content elements
     fn element_end(&mut self, name: &str);
 }
 
+/// A ParseHandler implementation that construct simplified DOM tree
 struct DomParseHandler {
     pub stack: Vec<Element>,
     pub current: Element,
@@ -308,6 +390,11 @@ impl ParseHandler for DomParseHandler {
     }
 }
 
+/// Parse HTML with the supplied handler
+///
+/// See the docs for [`ParseHandler`] for more details.
+///
+/// [`ParseHandler`]: trait.ParseHandler.html
 pub fn parse<H: ParseHandler>(handler: &mut H, raw: &str) {
     Parser {
         handler,
@@ -316,6 +403,17 @@ pub fn parse<H: ParseHandler>(handler: &mut H, raw: &str) {
 }
 
 /// Parse HTML and build a simplified DOM tree
+///
+/// # Example
+///
+/// ```rust
+/// use qd_html::parser::parse_to_dom;
+///
+/// let html = "<html><head></head><body></body></html>";
+///
+/// let document = parse_to_dom(html);
+///
+/// ```
 pub fn parse_to_dom(raw: &str) -> Document {
     let mut handler = DomParseHandler {
         stack: Vec::new(),

@@ -1,7 +1,10 @@
+
+//! Convert HTML to String
+
 use crate::dom::*;
 use crate::utils::*;
 
-pub struct HtmlWriter<'a> {
+struct HtmlWriter<'a> {
     out: &'a mut String,
 }
 
@@ -130,6 +133,7 @@ impl<'a> HtmlWriter<'a> {
     }
 }
 
+/// Converts a `Document` into  a `String`
 pub fn write(doc: &Document) -> String {
     let mut result = "".to_owned();
     {
@@ -148,6 +152,7 @@ pub fn write(doc: &Document) -> String {
     result
 }
 
+/// Converts a single `Element` node into a `String`
 pub fn write_element(root: &Element) -> String {
     let mut result = "".to_owned();
     {

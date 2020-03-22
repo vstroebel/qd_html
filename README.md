@@ -2,6 +2,8 @@
 
 A simple rust library for working with HTML.
 
+![Tests](https://github.com/vstroebel/qd_html/workflows/Tests/badge.svg)
+
 Feature:
  - parser with a SAX alike interface
  - writer
